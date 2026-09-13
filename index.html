@@ -9,12 +9,15 @@
   <meta name="googlebot" content="index,follow">
   <meta name="author" content="Platka Software Digital">
   <meta name="theme-color" content="#f6f5f1">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="apple-touch-icon" href="/logo.png">
   <link rel="canonical" href="https://platka-image-converter.pages.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Platka Image Converter">
   <meta property="og:title" content="Free Image Converter — Platka Image Converter">
   <meta property="og:description" content="Convert, resize, crop, and compress images privately in your browser. No account and no upload required.">
   <meta property="og:url" content="https://platka-image-converter.pages.dev/">
+  <meta property="og:image" content="https://platka-image-converter.pages.dev/logo.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Free Image Converter — Platka Image Converter">
   <meta name="twitter:description" content="A private, browser-based image converter for JPG, PNG, WEBP, and GIF.">
@@ -129,9 +132,8 @@
     header { display:block; margin:0 0 32px; }
     .site-nav { display:flex; align-items:center; justify-content:space-between; gap:28px; margin:0 0 64px; }
     .site-nav .brand { margin:0; color:#18345d; font-size:16px; letter-spacing:-.03em; }
-    .site-nav .brand-mark { width:32px; height:32px; border-radius:10px; background:linear-gradient(145deg,#ff9d73,#ff5d50); box-shadow:0 8px 18px rgba(255,111,91,.2); }
-    .site-nav .brand-mark svg { display:none; }
-    .site-nav .brand-mark:after { color:#fff; content:"✦"; font-size:17px; }
+    .site-nav .brand-mark { width:32px; height:32px; overflow:hidden; border-radius:10px; background:transparent; box-shadow:0 8px 18px rgba(255,111,91,.2); }
+    .site-nav .brand-mark img { display:block; width:100%; height:100%; object-fit:cover; }
     .nav-links { display:flex; gap:40px; align-items:center; margin-left:auto; }
     .nav-links a { position:relative; color:#5a7298; font-size:12px; font-weight:600; text-decoration:none; }
     .nav-links a:first-child { color:#2a456e; }
@@ -182,7 +184,8 @@
     .dl { background:#596ef2; }
     .dl:hover { background:#4158e4; }
     footer { margin-top:38px; padding-top:23px; border-top:1px solid #e5ecf8; color:#748cad; }
-    .footer-brand { color:#29456f; }
+    .footer-brand { display:flex; align-items:center; gap:8px; color:#29456f; }
+    .footer-brand img { width:25px; height:25px; border-radius:8px; object-fit:cover; }
     .footer-contact a,.footer-links button { color:#5269a5; }
     .footer-copy { color:#7b92b1; }
     @media (max-width:760px) { .site-nav { margin-bottom:42px; } .nav-links { display:none; } .site-nav .privacy-pill { margin-left:auto; } .hero { grid-template-columns:1fr; } .hero-art { min-height:230px; margin-top:-7px; } .hero-copy { text-align:left; } }
@@ -193,7 +196,7 @@
   <main class="wrap">
     <header>
       <nav class="site-nav" aria-label="Main navigation">
-        <p class="brand"><span class="brand-mark"></span>platka</p>
+        <p class="brand"><span class="brand-mark"><img src="/logo.png" alt=""></span>platka</p>
         <div class="nav-links"><a href="#top">Home</a><a href="#dropzone">Features</a><a href="#dropzone">How it works</a><a href="#quality">Pricing</a><a href="#contact">Contact</a></div>
         <div class="privacy-pill"><i></i> 100% Local Processing</div>
       </nav>
@@ -237,7 +240,7 @@
     <footer id="contact">
       <div class="footer-grid">
         <div>
-          <p class="footer-brand">Platka Image Converter</p>
+          <p class="footer-brand"><img src="/logo.png" alt="">Platka Image Converter</p>
           <p class="footer-copy">Platka Image Converter uses your browser’s built-in <code>&lt;canvas&gt;</code> to process images. Your files never leave this device, and original pixel dimensions stay intact unless you choose to resize.</p>
           <p class="footer-contact"><a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a> · 081111102880 · <a href="https://platkadigital.com" target="_blank" rel="noreferrer">platkadigital.com</a> · <a href="https://platka.io" target="_blank" rel="noreferrer">platka.io</a></p>
         </div>

@@ -13,12 +13,14 @@ Live application: [platka-image-converter.pages.dev](https://platka-image-conver
 - Resize images while preserving aspect ratio.
 - Crop images using pixel coordinates.
 - Download individual JPEG files or download the full queue as a ZIP archive.
-- No account, server-side image storage, or application backend.
+- No account or permanent image storage.
 - Responsive light interface with accessible controls, keyboard focus states, and reduced visual complexity.
 
 ## Privacy model
 
-Image processing runs in the browser using the Canvas API. The application does not upload selected files to a Platka server. Converted blobs are kept in browser memory for the current session and are released when the page is cleared or closed.
+Image processing runs in the browser using the Canvas API. Files selected from your device are not uploaded to a Platka server. Converted blobs are kept in browser memory for the current session and are released when the page is cleared or closed.
+
+URL imports use a small Cloudflare edge proxy only when needed. The proxy fetches a public HTTP or HTTPS image URL, adds the CORS headers required by the browser, and stores the response in a temporary cache with a maximum lifetime of 5 minutes. The cache expires automatically and is not a permanent image archive. Requests are limited to public image URLs and images up to 25 MB.
 
 The URL import feature uses `fetch()` and therefore depends on the source server allowing cross-origin requests. A source that blocks CORS cannot be imported directly; download the image and use the file picker instead.
 
@@ -46,13 +48,14 @@ python -m http.server 8080
 
 Then open [http://localhost:8080](http://localhost:8080/).
 
-Opening `index.html` directly also works for the core file conversion flow. A local server is recommended when testing URL imports and browser security behavior.
+Opening `index.html` directly works for the core file conversion flow. A local server is recommended when testing URL imports and browser security behavior. The `/api/image` proxy requires the Cloudflare Pages deployment to be running.
 
 ### Project structure
 
 ```text
 .
 ├── index.html       # UI, styles, conversion logic, and legal modal content
+├── _worker.js       # Temporary image URL proxy with a 5-minute edge cache
 ├── robots.txt       # Crawler access policy and sitemap location
 ├── sitemap.xml      # Canonical public URL for search engines
 ├── wrangler.jsonc   # Cloudflare Pages configuration

@@ -298,7 +298,7 @@
     const legalCopy = {
       privacy: {
         title: 'Privacy Policy',
-        html: '<p><strong>Last updated: September 13, 2026</strong></p><p>Platka Image Converter is designed to process images locally in your browser. Images selected, pasted, or resized through this tool are not uploaded to Platka or stored on our servers.</p><h3>Information we collect</h3><p>We do not require an account and do not intentionally collect the image files you process. If you contact us by email, we receive the information you choose to include in your message.</p><h3>Third-party services</h3><p>The app may load JSZip from a public CDN to create ZIP downloads. URL imports depend on the source website’s permissions and may be blocked by browser security rules.</p><h3>Contact</h3><p>Questions about privacy can be sent to <a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a>.</p>'
+        html: '<p><strong>Last updated: September 13, 2026</strong></p><p>Platka Image Converter is designed to process images locally in your browser. Images selected, pasted, or resized through this tool are not stored permanently by Platka.</p><h3>Information we collect</h3><p>We do not require an account and do not intentionally collect the image files you process. If you contact us by email, we receive the information you choose to include in your message.</p><h3>Temporary URL imports</h3><p>When you import an image URL, the image is fetched through a temporary Cloudflare edge proxy so sources without CORS can work. A temporary cache may retain that image for up to 5 minutes, after which it expires automatically. We do not create a permanent image archive or use imported images for analytics.</p><h3>Third-party services</h3><p>The app may load JSZip from a public CDN to create ZIP downloads. URL imports are limited to public HTTP or HTTPS image URLs.</p><h3>Contact</h3><p>Questions about privacy can be sent to <a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a>.</p>'
       },
       terms: {
         title: 'Terms & Conditions',
@@ -419,12 +419,15 @@
       const url = urlInput.value.trim(); if (!url) return;
       urlBtn.disabled = true; urlNote.style.color = '#85857d'; urlNote.textContent = 'Fetching image…';
       try {
-        const response = await fetch(url, { mode: 'cors' }); if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const response = await fetch(`/api/image?url=${encodeURIComponent(url)}`); if (!response.ok) {
+          const detail = await response.json().catch(() => ({}));
+          throw new Error(detail.error || `HTTP ${response.status}`);
+        }
         const blob = await response.blob(); if (!blob.type.startsWith('image/')) throw new Error('Not an image file');
         const base = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'image');
         handleFiles([new File([blob], base.includes('.') ? base : `${base}.${blob.type.split('/')[1] || 'png'}`, { type: blob.type })]);
         urlInput.value = ''; urlNote.textContent = '';
-      } catch { urlNote.style.color = 'var(--accent-dark)'; urlNote.textContent = 'Could not fetch that image. The source may block cross-origin access - try downloading it first.'; }
+      } catch (error) { urlNote.style.color = 'var(--accent-dark)'; urlNote.textContent = error.message || 'Could not fetch that image. Check the URL and try again.'; }
       finally { urlBtn.disabled = false; }
     }
     downloadAllBtn.addEventListener('click', async () => {

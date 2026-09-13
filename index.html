@@ -72,6 +72,9 @@
     .modal h2 { margin:0 0 6px; font:600 25px/1.15 Georgia,serif; }
     .modal-intro { margin:0 0 18px; color:var(--muted); font-size:14px; line-height:1.5; }
     .edit-preview { display:block; width:100%; max-height:250px; object-fit:contain; margin:0 0 18px; border:1px solid var(--line); border-radius:4px; background:#f1f1ef; }
+    .edit-stage { position:relative; display:grid; min-height:250px; place-items:center; margin:0 0 18px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:#f1f1ef; }
+    .edit-stage .edit-preview { max-width:100%; margin:0; border:0; border-radius:0; }
+    .crop-box { position:absolute; z-index:2; display:none; border:2px solid #ff2f22; box-shadow:0 0 0 9999px rgba(0,0,0,.08); pointer-events:none; }
     .edit-choices, .edit-panel-actions { display:flex; flex-wrap:wrap; gap:9px; }
     .edit-choices button { flex:1 1 130px; padding:12px; border:1px solid var(--line); border-radius:11px; color:var(--ink); background:var(--paper); font:600 13px var(--sans); transition:.2s ease; }
     .edit-choices button:hover { border-color:var(--rust); color:var(--rust); }
@@ -121,6 +124,9 @@
     .legal-content p { margin:0 0 10px; }
     .legal-close { display:flex; justify-content:flex-end; margin-top:20px; }
     .legal-close button { padding:10px 15px; border:0; border-radius:10px; color:#fff; background:var(--accent); font-weight:650; }
+    .edit-stage { background:#edf0f1; }
+    .edit-stage .edit-preview { max-height:280px; }
+    .crop-box { border-color:#ff271c; box-shadow:0 0 0 9999px rgba(30,36,42,.14),0 0 0 1px rgba(255,255,255,.75) inset; }
     @keyframes rise-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
     @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
     @media (max-width:620px) { body { padding:22px 14px 56px; } header { display:block; } .brand { margin-bottom:36px; } .privacy-pill { display:inline-flex; margin-top:25px; } .url-row { flex-direction:column; } .url-row button { width:100%; } .controls { gap:10px; padding:15px 12px; } .item { align-items:flex-start; padding:12px; } .item .dl { align-self:center; } .footer-grid { display:block; } .footer-links { justify-content:flex-start; margin-top:16px; } }
@@ -253,7 +259,10 @@
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
       <h2 id="editTitle">Tune your image</h2>
       <p class="modal-intro" id="editFileName"></p>
-      <img class="edit-preview" id="editPreview" alt="Image preview">
+      <div class="edit-stage" id="editStage">
+        <img class="edit-preview" id="editPreview" alt="Image preview">
+        <div class="crop-box" id="cropBox" aria-hidden="true"></div>
+      </div>
       <div class="edit-choices" id="editChoices">
         <button type="button" data-edit-mode="resize">Resize image</button>
         <button type="button" data-edit-mode="crop">Crop image</button>
@@ -346,6 +355,7 @@
       image.onload = () => {
         editState = { file, image, sourceUrl, mode: null };
         $('editFileName').textContent = `${file.name} · ${image.naturalWidth}×${image.naturalHeight} px`;
+        $('editPreview').onload = syncCropBox;
         $('editPreview').src = sourceUrl;
         $('editChoices').hidden = false; $('editPanel').hidden = true;
         $('editModal').hidden = false;
@@ -357,7 +367,23 @@
     function setEditFields(mode, width, height) {
       $('resizeWidth').value = width; $('resizeHeight').value = height;
       $('cropX').value = 0; $('cropY').value = 0; $('cropWidth').value = width; $('cropHeight').value = height;
-      $('resizeFields').hidden = mode !== 'resize'; $('cropFields').hidden = mode !== 'crop';
+      $('resizeFields').hidden = false; $('cropFields').hidden = false;
+      requestAnimationFrame(syncCropBox);
+    }
+    function syncCropBox() {
+      if (!editState || !$('editPreview').naturalWidth) return;
+      const image = $('editPreview'); const stage = $('editStage'); const box = $('cropBox');
+      const imageRect = image.getBoundingClientRect(); const stageRect = stage.getBoundingClientRect();
+      const scale = imageRect.width / editState.image.naturalWidth;
+      const x = clampInt($('cropX').value, 0, editState.image.naturalWidth - 1);
+      const y = clampInt($('cropY').value, 0, editState.image.naturalHeight - 1);
+      const width = clampInt($('cropWidth').value, 1, editState.image.naturalWidth - x);
+      const height = clampInt($('cropHeight').value, 1, editState.image.naturalHeight - y);
+      box.style.display = 'block';
+      box.style.left = `${imageRect.left - stageRect.left + x * scale}px`;
+      box.style.top = `${imageRect.top - stageRect.top + y * scale}px`;
+      box.style.width = `${width * scale}px`;
+      box.style.height = `${height * scale}px`;
     }
     function finishEditor(file) {
       const oldUrl = editState.sourceUrl;
@@ -455,10 +481,13 @@
       if (!$('resizeLock').checked || !editState) return;
       const width = Math.max(1, Number($('resizeWidth').value) || 1);
       $('resizeHeight').value = Math.max(1, Math.round(width * editState.image.naturalHeight / editState.image.naturalWidth));
+      syncCropBox();
     });
     $('resizeLock').addEventListener('change', () => {
       if ($('resizeLock').checked) $('resizeWidth').dispatchEvent(new Event('input'));
     });
+    ['cropX', 'cropY', 'cropWidth', 'cropHeight'].forEach(id => $(id).addEventListener('input', syncCropBox));
+    window.addEventListener('resize', syncCropBox);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && editState) finishEditor(editState.file);
     });

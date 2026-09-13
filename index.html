@@ -74,7 +74,16 @@
     .edit-preview { display:block; width:100%; max-height:250px; object-fit:contain; margin:0 0 18px; border:1px solid var(--line); border-radius:4px; background:#f1f1ef; }
     .edit-stage { position:relative; display:grid; min-height:250px; place-items:center; margin:0 0 18px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:#f1f1ef; }
     .edit-stage .edit-preview { max-width:100%; margin:0; border:0; border-radius:0; }
-    .crop-box { position:absolute; z-index:2; display:none; border:2px solid #ff2f22; box-shadow:0 0 0 9999px rgba(0,0,0,.08); pointer-events:none; }
+    .crop-box { position:absolute; z-index:2; display:none; border:2px solid #ff2f22; box-shadow:0 0 0 9999px rgba(0,0,0,.08); cursor:move; pointer-events:auto; touch-action:none; }
+    .crop-handle { position:absolute; width:11px; height:11px; border:2px solid #ff2f22; border-radius:2px; background:#fff; }
+    .crop-handle[data-handle="nw"] { top:-6px; left:-6px; cursor:nwse-resize; }
+    .crop-handle[data-handle="n"] { top:-6px; left:50%; cursor:ns-resize; transform:translateX(-50%); }
+    .crop-handle[data-handle="ne"] { top:-6px; right:-6px; cursor:nesw-resize; }
+    .crop-handle[data-handle="e"] { top:50%; right:-6px; cursor:ew-resize; transform:translateY(-50%); }
+    .crop-handle[data-handle="se"] { right:-6px; bottom:-6px; cursor:nwse-resize; }
+    .crop-handle[data-handle="s"] { bottom:-6px; left:50%; cursor:ns-resize; transform:translateX(-50%); }
+    .crop-handle[data-handle="sw"] { bottom:-6px; left:-6px; cursor:nesw-resize; }
+    .crop-handle[data-handle="w"] { top:50%; left:-6px; cursor:ew-resize; transform:translateY(-50%); }
     .edit-choices, .edit-panel-actions { display:flex; flex-wrap:wrap; gap:9px; }
     .edit-choices button { flex:1 1 130px; padding:12px; border:1px solid var(--line); border-radius:11px; color:var(--ink); background:var(--paper); font:600 13px var(--sans); transition:.2s ease; }
     .edit-choices button:hover { border-color:var(--rust); color:var(--rust); }
@@ -261,7 +270,9 @@
       <p class="modal-intro" id="editFileName"></p>
       <div class="edit-stage" id="editStage">
         <img class="edit-preview" id="editPreview" alt="Image preview">
-        <div class="crop-box" id="cropBox" aria-hidden="true"></div>
+        <div class="crop-box" id="cropBox" aria-label="Interactive crop selection">
+          <span class="crop-handle" data-handle="nw"></span><span class="crop-handle" data-handle="n"></span><span class="crop-handle" data-handle="ne"></span><span class="crop-handle" data-handle="e"></span><span class="crop-handle" data-handle="se"></span><span class="crop-handle" data-handle="s"></span><span class="crop-handle" data-handle="sw"></span><span class="crop-handle" data-handle="w"></span>
+        </div>
       </div>
       <div class="edit-choices" id="editChoices">
         <button type="button" data-edit-mode="resize">Resize image</button>
@@ -304,6 +315,7 @@
     const urlInput = $('urlInput'), urlBtn = $('urlBtn'), urlNote = $('urlNote');
     const entries = [], editQueue = [];
     let editState = null;
+    let cropInteraction = null;
     const legalCopy = {
       privacy: {
         title: 'Privacy Policy',
@@ -385,6 +397,52 @@
       box.style.width = `${width * scale}px`;
       box.style.height = `${height * scale}px`;
     }
+    function pointerToImage(event) {
+      const rect = $('editPreview').getBoundingClientRect();
+      const scale = rect.width / editState.image.naturalWidth;
+      return {
+        x: (event.clientX - rect.left) / scale,
+        y: (event.clientY - rect.top) / scale
+      };
+    }
+    function updateCropFromPointer(event) {
+      if (!cropInteraction || !editState) return;
+      const point = pointerToImage(event);
+      const start = cropInteraction;
+      const dx = point.x - start.pointer.x;
+      const dy = point.y - start.pointer.y;
+      const maxW = editState.image.naturalWidth;
+      const maxH = editState.image.naturalHeight;
+      const minSize = Math.min(20, maxW, maxH);
+      let x = start.x, y = start.y, width = start.width, height = start.height;
+      const handle = start.handle;
+      if (handle === 'move') {
+        x = Math.max(0, Math.min(maxW - width, start.x + dx));
+        y = Math.max(0, Math.min(maxH - height, start.y + dy));
+      } else {
+        if (handle.includes('w')) { const nextX = Math.max(0, Math.min(start.x + start.width - minSize, start.x + dx)); x = nextX; width = start.width + start.x - nextX; }
+        if (handle.includes('e')) width = Math.max(minSize, Math.min(maxW - start.x, start.width + dx));
+        if (handle.includes('n')) { const nextY = Math.max(0, Math.min(start.y + start.height - minSize, start.y + dy)); y = nextY; height = start.height + start.y - nextY; }
+        if (handle.includes('s')) height = Math.max(minSize, Math.min(maxH - start.y, start.height + dy));
+      }
+      $('cropX').value = Math.round(x); $('cropY').value = Math.round(y);
+      $('cropWidth').value = Math.round(width); $('cropHeight').value = Math.round(height);
+      syncCropBox();
+    }
+    $('cropBox').addEventListener('pointerdown', event => {
+      if (!editState) return;
+      event.preventDefault();
+      const point = pointerToImage(event);
+      cropInteraction = {
+        handle: event.target.dataset.handle || 'move', pointer: point,
+        x: Number($('cropX').value), y: Number($('cropY').value),
+        width: Number($('cropWidth').value), height: Number($('cropHeight').value)
+      };
+      $('cropBox').setPointerCapture(event.pointerId);
+    });
+    $('cropBox').addEventListener('pointermove', updateCropFromPointer);
+    $('cropBox').addEventListener('pointerup', () => { cropInteraction = null; });
+    $('cropBox').addEventListener('pointercancel', () => { cropInteraction = null; });
     function finishEditor(file) {
       const oldUrl = editState.sourceUrl;
       editState = null; $('editModal').hidden = true; URL.revokeObjectURL(oldUrl);

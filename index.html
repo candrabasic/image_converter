@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Free Image Converter — Platka Image Converter</title>
+  <title>Free Image Converter - Platka Image Converter</title>
   <meta name="description" content="Platka Image Converter is a free online image converter for JPG, PNG, WEBP, and GIF. Convert, resize, crop, and compress images privately in your browser.">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="googlebot" content="index,follow">
@@ -14,12 +14,12 @@
   <link rel="canonical" href="https://platka-image-converter.pages.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Platka Image Converter">
-  <meta property="og:title" content="Free Image Converter — Platka Image Converter">
+  <meta property="og:title" content="Free Image Converter - Platka Image Converter">
   <meta property="og:description" content="Convert, resize, crop, and compress images privately in your browser. No account and no upload required.">
   <meta property="og:url" content="https://platka-image-converter.pages.dev/">
   <meta property="og:image" content="https://platka-image-converter.pages.dev/logo.png">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Free Image Converter — Platka Image Converter">
+  <meta name="twitter:title" content="Free Image Converter - Platka Image Converter">
   <meta name="twitter:description" content="A private, browser-based image converter for JPG, PNG, WEBP, and GIF.">
   <script type="application/ld+json">
     {
@@ -424,7 +424,7 @@
         const base = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'image');
         handleFiles([new File([blob], base.includes('.') ? base : `${base}.${blob.type.split('/')[1] || 'png'}`, { type: blob.type })]);
         urlInput.value = ''; urlNote.textContent = '';
-      } catch { urlNote.style.color = 'var(--accent-dark)'; urlNote.textContent = 'Could not fetch that image. The source may block cross-origin access — try downloading it first.'; }
+      } catch { urlNote.style.color = 'var(--accent-dark)'; urlNote.textContent = 'Could not fetch that image. The source may block cross-origin access - try downloading it first.'; }
       finally { urlBtn.disabled = false; }
     }
     downloadAllBtn.addEventListener('click', async () => {

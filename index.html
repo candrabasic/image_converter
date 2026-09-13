@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Convertly — Image conversion, beautifully simple</title>
+  <title>Platka Image Converter — Simple, private image tools</title>
   <style>
     :root { --ink:#20201d; --paper:#f6f5f1; --panel:#fff; --line:#e5e3dc; --accent:#b87952; --accent-dark:#8e5638; --sage:#687b6b; --muted:#85857d; --sans:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif; --mono:"SFMono-Regular",Consolas,monospace; --shadow:0 20px 60px rgba(50,45,35,.09); }
     * { box-sizing:border-box; }
@@ -73,16 +73,28 @@
     .dl { flex:none; padding:9px 13px; border-radius:9px; color:#fff; background:var(--accent); font:600 11px var(--mono); text-decoration:none; transition:.2s ease; }
     .dl:hover { background:var(--accent-dark); transform:translateY(-1px); }
     footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--line); color:#8a8a82; font-size:12px; line-height:1.7; }
+    .footer-grid { display:flex; justify-content:space-between; gap:24px; align-items:flex-start; }
+    .footer-copy { max-width:58ch; margin:0; }
+    .footer-brand { margin:0 0 5px; color:var(--ink); font-size:13px; font-weight:750; }
+    .footer-contact { margin:0; color:var(--muted); font-size:11px; }
+    .footer-contact a,.footer-links button { color:var(--accent-dark); }
+    .footer-links { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; white-space:nowrap; }
+    .footer-links button { padding:0; border:0; background:transparent; font:inherit; text-decoration:underline; text-underline-offset:3px; }
+    .legal-content { color:#66665f; font-size:13px; line-height:1.7; }
+    .legal-content h3 { margin:18px 0 5px; color:var(--ink); font-size:14px; }
+    .legal-content p { margin:0 0 10px; }
+    .legal-close { display:flex; justify-content:flex-end; margin-top:20px; }
+    .legal-close button { padding:10px 15px; border:0; border-radius:10px; color:#fff; background:var(--accent); font-weight:650; }
     @keyframes rise-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
     @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
-    @media (max-width:620px) { body { padding:22px 14px 56px; } header { display:block; } .brand { margin-bottom:36px; } .privacy-pill { display:inline-flex; margin-top:25px; } .url-row { flex-direction:column; } .url-row button { width:100%; } .controls { gap:10px; padding:15px 12px; } .item { align-items:flex-start; padding:12px; } .item .dl { align-self:center; } }
+    @media (max-width:620px) { body { padding:22px 14px 56px; } header { display:block; } .brand { margin-bottom:36px; } .privacy-pill { display:inline-flex; margin-top:25px; } .url-row { flex-direction:column; } .url-row button { width:100%; } .controls { gap:10px; padding:15px 12px; } .item { align-items:flex-start; padding:12px; } .item .dl { align-self:center; } .footer-grid { display:block; } .footer-links { justify-content:flex-start; margin-top:16px; } }
   </style>
 </head>
 <body>
   <main class="wrap">
     <header>
       <div>
-        <p class="brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>convertly</p>
+        <p class="brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>platka</p>
         <p class="kicker">Private by design · works in your browser</p>
         <h1>Make every image<br>feel <em>lighter.</em></h1>
         <p class="lede">Convert, resize, and crop your images with a polished workflow that keeps your files on your device. No accounts. No uploads. Just better-looking files.</p>
@@ -113,7 +125,16 @@
       <button class="ghost" id="downloadAllBtn" type="button" disabled>Download all (.zip)</button>
     </div>
     <section class="list" id="list" aria-live="polite"></section>
-    <footer>Convertly uses your browser’s built-in <code>&lt;canvas&gt;</code> to export JPEGs. Your images never leave this device, and original pixel dimensions stay intact unless you choose to resize.</footer>
+    <footer>
+      <div class="footer-grid">
+        <div>
+          <p class="footer-brand">Platka Image Converter</p>
+          <p class="footer-copy">Platka Image Converter uses your browser’s built-in <code>&lt;canvas&gt;</code> to process images. Your files never leave this device, and original pixel dimensions stay intact unless you choose to resize.</p>
+          <p class="footer-contact"><a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a> · 081111102880 · <a href="https://platkadigital.com" target="_blank" rel="noreferrer">platkadigital.com</a> · <a href="https://platka.io" target="_blank" rel="noreferrer">platka.io</a></p>
+        </div>
+        <nav class="footer-links" aria-label="Legal links"><button type="button" data-legal="privacy">Privacy Policy</button><button type="button" data-legal="terms">Terms &amp; Conditions</button></nav>
+      </div>
+    </footer>
   </main>
 
   <div class="modal-backdrop" id="editModal" hidden>
@@ -146,6 +167,14 @@
     </section>
   </div>
 
+  <div class="modal-backdrop" id="legalModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+      <h2 id="legalTitle">Privacy Policy</h2>
+      <div class="legal-content" id="legalContent"></div>
+      <div class="legal-close"><button type="button" id="legalClose">Close</button></div>
+    </section>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id);
@@ -154,6 +183,25 @@
     const urlInput = $('urlInput'), urlBtn = $('urlBtn'), urlNote = $('urlNote');
     const entries = [], editQueue = [];
     let editState = null;
+    const legalCopy = {
+      privacy: {
+        title: 'Privacy Policy',
+        html: '<p><strong>Last updated: September 13, 2026</strong></p><p>Platka Image Converter is designed to process images locally in your browser. Images selected, pasted, or resized through this tool are not uploaded to Platka or stored on our servers.</p><h3>Information we collect</h3><p>We do not require an account and do not intentionally collect the image files you process. If you contact us by email, we receive the information you choose to include in your message.</p><h3>Third-party services</h3><p>The app may load JSZip from a public CDN to create ZIP downloads. URL imports depend on the source website’s permissions and may be blocked by browser security rules.</p><h3>Contact</h3><p>Questions about privacy can be sent to <a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a>.</p>'
+      },
+      terms: {
+        title: 'Terms & Conditions',
+        html: '<p><strong>Last updated: September 13, 2026</strong></p><p>By using Platka Image Converter, you agree to use the service responsibly and only with images you have permission to process.</p><h3>Service</h3><p>This browser-based tool is provided for general image conversion, resizing, cropping, and compression. Results may vary by browser, source format, and selected quality.</p><h3>Your responsibility</h3><p>You are responsible for your files, copyrights, permissions, and any use of converted images. Do not use the service to process unlawful or harmful content.</p><h3>No warranty</h3><p>The service is provided as available. Platka does not guarantee uninterrupted availability or that every image format will convert successfully. Keep your original files as a backup.</p><h3>Contact</h3><p>For support, contact <a href="mailto:platkasoftwaredigital@gmail.com">platkasoftwaredigital@gmail.com</a> or call 081111102880.</p>'
+      }
+    };
+
+    document.querySelectorAll('[data-legal]').forEach(button => button.addEventListener('click', () => {
+      const legal = legalCopy[button.dataset.legal];
+      $('legalTitle').textContent = legal.title;
+      $('legalContent').innerHTML = legal.html;
+      $('legalModal').hidden = false;
+    }));
+    $('legalClose').addEventListener('click', () => { $('legalModal').hidden = true; });
+    $('legalModal').addEventListener('click', event => { if (event.target === $('legalModal')) $('legalModal').hidden = true; });
 
     qualitySlider.addEventListener('input', () => {
       qval.textContent = qualitySlider.value + '%';

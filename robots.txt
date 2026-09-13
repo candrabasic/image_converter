@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://platka-image-converter.pages.dev/sitemap.xml
